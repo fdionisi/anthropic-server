@@ -62,13 +62,17 @@ pub async fn messages(
             .unwrap();
 
         let stream = stream.map(|item| {
+            let item = item.unwrap();
+            let item = serde_json::to_value(&item).unwrap();
             Ok::<Event, Infallible>(
-                Event::default().data(&serde_json::to_string(&item.unwrap()).unwrap()),
+                Event::default()
+                    .event(item["type"].as_str().unwrap())
+                    .data(&serde_json::to_string(&item).unwrap()),
             )
         });
 
         Sse::new(stream)
-            .keep_alive(axum::response::sse::KeepAlive::new().text("keep-alive-text"))
+            .keep_alive(axum::response::sse::KeepAlive::new())
             .into_response()
     } else {
         Json(client.messages(create_message_request).await.unwrap()).into_response()

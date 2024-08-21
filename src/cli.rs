@@ -4,7 +4,10 @@ use axum::{middleware, routing::post, Router};
 use tokio::net::ToSocketAddrs;
 use tower_http::trace::TraceLayer;
 
-use crate::{auth::auth_middleware, client::Client, routes::messages, server_state::ServerState};
+use crate::{
+    auth::auth_middleware, client::Client, provider::Provider, routes::messages,
+    server_state::ServerState,
+};
 
 /// Anthropic proxy server.
 ///
@@ -25,29 +28,13 @@ pub struct Cli {
     provider: Provider,
 }
 
-#[derive(Clone, clap::Subcommand)]
-enum Provider {
-    /// Use the Anthropic API
-    Antrhopic {
-        #[clap(long, env = "ANTHROPIC_API_KEY")]
-        api_key: String,
-    },
-    /// Use the Google Vertex AI API
-    VertexAi {
-        #[clap(long, env = "VERTEXAI_PROJECT")]
-        project: String,
-        #[clap(long, env = "VERTEXAI_REGION")]
-        region: String,
-    },
-}
-
 impl Cli {
     pub fn address(&self) -> impl ToSocketAddrs {
         (self.host.to_owned(), self.port)
     }
     pub async fn http(&self) -> anyhow::Result<Router> {
         let anthropic: Client = Client::new(match self.provider.to_owned() {
-            Provider::Antrhopic { api_key } => {
+            Provider::Anthropic { api_key } => {
                 use anthropic::Anthropic;
                 Arc::new(Anthropic::builder().api_key(api_key).build()?)
             }
@@ -63,7 +50,8 @@ impl Cli {
             }
         });
 
-        let server_state = ServerState::new(anthropic, self.auth_token.clone());
+        let server_state =
+            ServerState::new(anthropic, self.auth_token.clone(), self.provider.clone());
 
         Ok(Router::new()
             .route("/v1/messages", post(messages))

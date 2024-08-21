@@ -1,6 +1,7 @@
 mod auth;
 mod cli;
 mod client;
+mod provider;
 mod routes;
 mod server_state;
 

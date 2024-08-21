@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "fcc10cab70daef6c4f1a784676997163515e87ad" }
-anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "fcc10cab70daef6c4f1a784676997163515e87ad" }
+anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "d538aa17d4c89d9e931d053b851e5f9f979e4a3b" }
+anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "d538aa17d4c89d9e931d053b851e5f9f979e4a3b" }
 anyhow = "1"
 async-trait = "0.1.81"
 axum = "0.7"
@@ -13,7 +13,7 @@ axum-extra = { version = "0.9", features = ["typed-header"] }
 clap = { version = "4.5.15", features = ["derive", "env"] }
 futures = "0.3"
 headers = "0.4"
-reqwest = { version = "0.12", features = ["stream", "json"] }
+reqwest = "0.12"
 serde_json = "1"
 tokio = { version = "1.0", features = ["full"] }
 tower-http = { version = "0.5.0", features = ["fs", "trace", "cors"] }

@@ -92,23 +92,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "anthropic_vertexai"
-version = "0.1.0"
-source = "git+https://github.com/fdionisi/anthropic-sdk?rev=fcc10cab70daef6c4f1a784676997163515e87ad#fcc10cab70daef6c4f1a784676997163515e87ad"
-dependencies = [
- "anthropic",
- "anyhow",
- "async-trait",
- "google-cloud-auth",
- "google-cloud-token",
- "reqwest",
- "secrecy",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "antrhopic-server"
+name = "anthropic-server"
 version = "0.1.0"
 dependencies = [
  "anthropic",
@@ -126,6 +110,22 @@ dependencies = [
  "tower-http",
  "tracing",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "anthropic_vertexai"
+version = "0.1.0"
+source = "git+https://github.com/fdionisi/anthropic-sdk?rev=fcc10cab70daef6c4f1a784676997163515e87ad#fcc10cab70daef6c4f1a784676997163515e87ad"
+dependencies = [
+ "anthropic",
+ "anyhow",
+ "async-trait",
+ "google-cloud-auth",
+ "google-cloud-token",
+ "reqwest",
+ "secrecy",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

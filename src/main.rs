@@ -1,3 +1,4 @@
+mod api_key_header;
 mod auth;
 mod cli;
 mod client;

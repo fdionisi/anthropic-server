@@ -7,15 +7,16 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use axum_extra::TypedHeader;
-use headers::{authorization::Bearer, Authorization};
+
+use crate::api_key_header::ApiKeyHeader;
 
 pub async fn auth_middleware(
     State(token): State<String>,
-    TypedHeader(authorization): TypedHeader<Authorization<Bearer>>,
+    TypedHeader(authorization): TypedHeader<ApiKeyHeader>,
     request: Request,
     next: Next,
 ) -> Result<Response, Infallible> {
-    if authorization.token() != token {
+    if authorization.key() != token {
         return Ok((StatusCode::UNAUTHORIZED, "Unauthorized").into_response());
     }
 

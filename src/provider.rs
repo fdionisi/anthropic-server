@@ -5,6 +5,8 @@ pub enum Provider {
         #[clap(long, env = "ANTHROPIC_API_KEY")]
         api_key: String,
     },
+    /// Use the Amazon Bedrock API
+    Bedrock,
     /// Use the Google Vertex AI API
     VertexAi {
         #[clap(long, env = "VERTEXAI_PROJECT")]

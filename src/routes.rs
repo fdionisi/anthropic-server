@@ -1,9 +1,7 @@
 use std::{convert::Infallible, str::FromStr};
 
-use anthropic::{
-    messages::{IncomingCreateMessageRequest, Messages, MessagesStream},
-    Model as AnthropicModel,
-};
+use anthropic::{messages::IncomingCreateMessageRequest, Model as AnthropicModel};
+use anthropic_bedrock::Model as BedrockModel;
 use anthropic_vertexai::Model as VertexAiModel;
 use anyhow::Result;
 use axum::{
@@ -20,16 +18,23 @@ use crate::{client::Client, provider::Provider};
 fn get_model(model: String, provider: Provider) -> Result<String> {
     let model: AnthropicModel = AnthropicModel::from_str(&model)?;
 
-    match provider {
-        Provider::Anthropic { .. } => Ok(model.to_string()),
-        Provider::VertexAi { .. } => Ok(match model {
+    Ok(match provider {
+        Provider::Anthropic { .. } => model.to_string(),
+        Provider::Bedrock { .. } => match model {
+            AnthropicModel::ClaudeThreeDotFiveSonnet => BedrockModel::ClaudeThreeDotFiveSonnet,
+            AnthropicModel::ClaudeThreeSonnet => BedrockModel::ClaudeThreeSonnet,
+            AnthropicModel::ClaudeThreeOpus => BedrockModel::ClaudeThreeOpus,
+            AnthropicModel::ClaudeThreeHaiku => BedrockModel::ClaudeThreeHaiku,
+        }
+        .to_string(),
+        Provider::VertexAi { .. } => match model {
             AnthropicModel::ClaudeThreeDotFiveSonnet => VertexAiModel::ClaudeThreeDotFiveSonnet,
             AnthropicModel::ClaudeThreeSonnet => VertexAiModel::ClaudeThreeSonnet,
             AnthropicModel::ClaudeThreeOpus => VertexAiModel::ClaudeThreeOpus,
             AnthropicModel::ClaudeThreeHaiku => VertexAiModel::ClaudeThreeHaiku,
         }
-        .to_string()),
-    }
+        .to_string(),
+    })
 }
 
 pub async fn messages(

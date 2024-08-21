@@ -4,10 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "bf25f78992dc690cc1e71caf75b9cf81e2e95d85" }
-anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "bf25f78992dc690cc1e71caf75b9cf81e2e95d85" }
+anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "e73b5f080fb9edba61ee938bcee8ade1ab043f18" }
+anthropic_bedrock = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "e73b5f080fb9edba61ee938bcee8ade1ab043f18" }
+anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "e73b5f080fb9edba61ee938bcee8ade1ab043f18" }
 anyhow = "1"
 async-trait = "0.1.81"
+aws-config = "1.5.5"
 axum = "0.7"
 axum-extra = { version = "0.9", features = ["typed-header"] }
 clap = { version = "4.5.15", features = ["derive", "env"] }

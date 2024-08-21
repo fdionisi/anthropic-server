@@ -38,6 +38,13 @@ impl Cli {
                 use anthropic::Anthropic;
                 Arc::new(Anthropic::builder().api_key(api_key).build()?)
             }
+            Provider::Bedrock => {
+                use anthropic_bedrock::AnthropicBedrock;
+                use aws_config::{defaults, BehaviorVersion};
+                let config = defaults(BehaviorVersion::latest()).load().await;
+
+                Arc::new(AnthropicBedrock::new(&config))
+            }
             Provider::VertexAi { project, region } => {
                 use anthropic_vertexai::AnthropicVertexAi;
                 Arc::new(

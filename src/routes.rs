@@ -1,7 +1,9 @@
 use std::{convert::Infallible, str::FromStr};
 
 use anthropic::{
-    messages::{CreateMessageRequestWithStream, Messages, MessagesStream},
+    messages::{
+        CreateMessageRequestWithStream, IncomingCreateMessageRequest, Messages, MessagesStream,
+    },
     Model as AnthropicModel,
 };
 use anthropic_vertexai::Model as VertexAiModel;
@@ -35,9 +37,9 @@ fn get_model(model: String, provider: Provider) -> Result<String> {
 pub async fn messages(
     State(client): State<Client>,
     State(provider): State<Provider>,
-    Json(request): Json<CreateMessageRequestWithStream>,
+    Json(request): Json<IncomingCreateMessageRequest>,
 ) -> Response {
-    let CreateMessageRequestWithStream {
+    let IncomingCreateMessageRequest {
         stream,
         mut create_message_request,
     } = request;
@@ -55,7 +57,7 @@ pub async fn messages(
             }
         };
 
-    if stream {
+    if stream.is_some_and(|f| f) {
         let stream = client
             .messages_stream(create_message_request)
             .await

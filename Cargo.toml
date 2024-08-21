@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "d538aa17d4c89d9e931d053b851e5f9f979e4a3b" }
-anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "d538aa17d4c89d9e931d053b851e5f9f979e4a3b" }
+anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "8f4059d38893ccdcd28fe1b1f98e35eb0e9a0455" }
+anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "8f4059d38893ccdcd28fe1b1f98e35eb0e9a0455" }
 anyhow = "1"
 async-trait = "0.1.81"
 axum = "0.7"

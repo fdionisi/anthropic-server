@@ -1,9 +1,7 @@
 use std::{convert::Infallible, str::FromStr};
 
 use anthropic::{
-    messages::{
-        CreateMessageRequestWithStream, IncomingCreateMessageRequest, Messages, MessagesStream,
-    },
+    messages::{IncomingCreateMessageRequest, Messages, MessagesStream},
     Model as AnthropicModel,
 };
 use anthropic_vertexai::Model as VertexAiModel;

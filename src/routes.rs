@@ -40,6 +40,10 @@ fn get_model(model: String, provider: Provider) -> Result<String> {
     })
 }
 
+pub async fn healthz() -> Response {
+    ((StatusCode::OK, Json(json!({ "status": "ok" })))).into_response()
+}
+
 pub async fn messages(
     State(client): State<Client>,
     State(provider): State<Provider>,

@@ -1,11 +1,18 @@
 use std::sync::Arc;
 
-use axum::{middleware, routing::post, Router};
+use axum::{
+    middleware,
+    routing::{get, post},
+    Router,
+};
 use tokio::net::ToSocketAddrs;
 use tower_http::trace::TraceLayer;
 
 use crate::{
-    auth::auth_middleware, client::Client, provider::Provider, routes::messages,
+    auth::auth_middleware,
+    client::Client,
+    provider::Provider,
+    routes::{healthz, messages},
     server_state::ServerState,
 };
 
@@ -61,12 +68,17 @@ impl Cli {
             ServerState::new(anthropic, self.auth_token.clone(), self.provider.clone());
 
         Ok(Router::new()
-            .route("/v1/messages", post(messages))
-            .layer(middleware::from_fn_with_state(
-                server_state.clone(),
-                auth_middleware,
-            ))
-            .layer(TraceLayer::new_for_http())
-            .with_state(server_state))
+            .route("/healthz", get(healthz))
+            .nest(
+                "/v1",
+                Router::new()
+                    .route("/messages", post(messages))
+                    .route_layer(middleware::from_fn_with_state(
+                        server_state.clone(),
+                        auth_middleware,
+                    ))
+                    .with_state(server_state),
+            )
+            .layer(TraceLayer::new_for_http()))
     }
 }

@@ -1,6 +1,9 @@
 use std::{convert::Infallible, str::FromStr};
 
-use anthropic::{messages::IncomingCreateMessageRequest, Model as AnthropicModel};
+use anthropic::{
+    messages::{CreateMessageResponse, IncomingCreateMessageRequest},
+    Model as AnthropicModel,
+};
 use anthropic_bedrock::Model as BedrockModel;
 use anthropic_vertexai::Model as VertexAiModel;
 use anyhow::Result;
@@ -80,6 +83,20 @@ pub async fn messages(
             .keep_alive(axum::response::sse::KeepAlive::new())
             .into_response()
     } else {
-        Json(client.messages(create_message_request).await.unwrap()).into_response()
+        match client.messages(create_message_request).await {
+            Ok(message_respose) => match message_respose {
+                CreateMessageResponse::Message(_) => {
+                    (StatusCode::OK, Json(message_respose)).into_response()
+                }
+                CreateMessageResponse::Error { .. } => {
+                    (StatusCode::BAD_REQUEST, Json(message_respose)).into_response()
+                }
+            },
+            Err(err) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(json!({ "error": err.to_string() })),
+            )
+                .into_response(),
+        }
     }
 }

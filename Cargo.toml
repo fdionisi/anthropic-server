@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "05608a4ffe5e74118f93d4bccf5d6b59e3d28311" }
-anthropic_bedrock = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "05608a4ffe5e74118f93d4bccf5d6b59e3d28311" }
-anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "05608a4ffe5e74118f93d4bccf5d6b59e3d28311" }
+anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "343eb09974fa34e61ac4468d7010827eae336ff2" }
+anthropic_bedrock = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "343eb09974fa34e61ac4468d7010827eae336ff2" }
+anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "343eb09974fa34e61ac4468d7010827eae336ff2" }
 anyhow = "1"
 async-trait = "0.1.81"
 aws-config = "1.5.5"

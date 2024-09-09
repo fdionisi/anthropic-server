@@ -18,9 +18,7 @@ use serde_json::json;
 
 use crate::{client::Client, provider::Provider};
 
-fn get_model(model: String, provider: Provider) -> Result<String> {
-    let model: AnthropicModel = AnthropicModel::from_str(&model)?;
-
+fn get_model(model: &AnthropicModel, provider: &Provider) -> Result<String> {
     Ok(match provider {
         Provider::Anthropic { .. } => model.to_string(),
         Provider::Bedrock { .. } => match model {
@@ -40,6 +38,21 @@ fn get_model(model: String, provider: Provider) -> Result<String> {
     })
 }
 
+// XXX: This is required until Bedrock supports the same max_token as Anthropic or Vertex AI
+fn get_max_tokens(model: &AnthropicModel, provider: &Provider, max_token: u32) -> u32 {
+    match provider {
+        Provider::Anthropic { .. } | Provider::VertexAi { .. } => {
+            if matches!(model, AnthropicModel::ClaudeThreeDotFiveSonnet)
+                || matches!(model, AnthropicModel::ClaudeThreeHaiku)
+            {
+                return max_token.min(8192);
+            }
+            max_token.min(4096)
+        }
+        Provider::Bedrock { .. } => max_token.min(4096),
+    }
+}
+
 pub async fn healthz() -> Response {
     ((StatusCode::OK, Json(json!({ "status": "ok" })))).into_response()
 }
@@ -54,18 +67,32 @@ pub async fn messages(
         mut create_message_request,
     } = request;
 
-    create_message_request.model =
-        match get_model(create_message_request.model.to_owned(), provider.to_owned()) {
-            Ok(model) => model,
-            Err(e) => {
-                return Response::builder()
-                    .status(StatusCode::BAD_REQUEST)
-                    .body(axum::body::Body::from(
-                        json!({ "error": e.to_string() }).to_string(),
-                    ))
-                    .unwrap()
-            }
-        };
+    let model: AnthropicModel = match AnthropicModel::from_str(&create_message_request.model) {
+        Ok(model) => model,
+        Err(_) => {
+            return Response::builder()
+                .status(StatusCode::BAD_REQUEST)
+                .body(axum::body::Body::from(
+                    json!({ "error": "Invalid model" }).to_string(),
+                ))
+                .unwrap()
+        }
+    };
+
+    create_message_request.max_tokens =
+        get_max_tokens(&model, &provider, create_message_request.max_tokens);
+
+    create_message_request.model = match get_model(&model, &provider) {
+        Ok(model) => model,
+        Err(e) => {
+            return Response::builder()
+                .status(StatusCode::BAD_REQUEST)
+                .body(axum::body::Body::from(
+                    json!({ "error": e.to_string() }).to_string(),
+                ))
+                .unwrap()
+        }
+    };
 
     if stream.is_some_and(|f| f) {
         let stream = client

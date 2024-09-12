@@ -78,7 +78,7 @@ dependencies = [
 [[package]]
 name = "anthropic"
 version = "0.1.0"
-source = "git+https://github.com/fdionisi/anthropic-sdk?rev=343eb09974fa34e61ac4468d7010827eae336ff2#343eb09974fa34e61ac4468d7010827eae336ff2"
+source = "git+https://github.com/fdionisi/anthropic-sdk?rev=3df4bbaf803bdbded27ad9d185349fd20e126686#3df4bbaf803bdbded27ad9d185349fd20e126686"
 dependencies = [
  "anyhow",
  "async-stream",
@@ -117,7 +117,7 @@ dependencies = [
 [[package]]
 name = "anthropic_bedrock"
 version = "0.1.0"
-source = "git+https://github.com/fdionisi/anthropic-sdk?rev=343eb09974fa34e61ac4468d7010827eae336ff2#343eb09974fa34e61ac4468d7010827eae336ff2"
+source = "git+https://github.com/fdionisi/anthropic-sdk?rev=3df4bbaf803bdbded27ad9d185349fd20e126686#3df4bbaf803bdbded27ad9d185349fd20e126686"
 dependencies = [
  "anthropic",
  "anyhow",
@@ -137,7 +137,7 @@ dependencies = [
 [[package]]
 name = "anthropic_vertexai"
 version = "0.1.0"
-source = "git+https://github.com/fdionisi/anthropic-sdk?rev=343eb09974fa34e61ac4468d7010827eae336ff2#343eb09974fa34e61ac4468d7010827eae336ff2"
+source = "git+https://github.com/fdionisi/anthropic-sdk?rev=3df4bbaf803bdbded27ad9d185349fd20e126686#3df4bbaf803bdbded27ad9d185349fd20e126686"
 dependencies = [
  "anthropic",
  "anyhow",

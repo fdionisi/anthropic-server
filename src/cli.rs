@@ -23,7 +23,7 @@ use crate::{
 #[derive(clap::Parser)]
 pub struct Cli {
     /// The token used for authenticating all incoming requests
-    #[clap(long, env = "API_KEY")]
+    #[clap(long, env = "AUTH_TOKEN")]
     api_key: String,
     /// The host to bind to
     #[clap(long, default_value = "0.0.0.0")]

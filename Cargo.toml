@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "e786321a615ba15b63a040c8ca893a5f3a28f59c" }
-anthropic_bedrock = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "e786321a615ba15b63a040c8ca893a5f3a28f59c" }
-anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "e786321a615ba15b63a040c8ca893a5f3a28f59c" }
+anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "0d0e48dc6c1cd42d4d4d4d35d9a040f793424564" }
+anthropic_bedrock = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "0d0e48dc6c1cd42d4d4d4d35d9a040f793424564" }
+anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "0d0e48dc6c1cd42d4d4d4d35d9a040f793424564" }
 # anthropic = { path = "../anthropic/crates/anthropic" }
 # anthropic_bedrock = { path = "../anthropic/crates/bedrock" }
 # anthropic_vertexai = { path = "../anthropic/crates/vertexai" }

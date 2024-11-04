@@ -5,11 +5,12 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use axum_auth_api_key::ApiKey;
+use http_client_reqwest::HttpClientReqwest;
 use tokio::net::ToSocketAddrs;
 use tower_http::trace::TraceLayer;
 
 use crate::{
-    auth::auth_middleware,
     client::Client,
     provider::Provider,
     routes::{healthz, messages},
@@ -22,8 +23,8 @@ use crate::{
 #[derive(clap::Parser)]
 pub struct Cli {
     /// The token used for authenticating all incoming requests
-    #[clap(long, env = "AUTH_TOKEN")]
-    auth_token: String,
+    #[clap(long, env = "API_KEY")]
+    api_key: String,
     /// The host to bind to
     #[clap(long, default_value = "0.0.0.0")]
     host: String,
@@ -39,11 +40,19 @@ impl Cli {
     pub fn address(&self) -> impl ToSocketAddrs {
         (self.host.to_owned(), self.port)
     }
+
     pub async fn http(&self) -> anyhow::Result<Router> {
+        let http_client = Arc::new(HttpClientReqwest::default());
+
         let anthropic: Client = Client::new(match self.provider.to_owned() {
             Provider::Anthropic { api_key } => {
                 use anthropic::Anthropic;
-                Arc::new(Anthropic::builder().api_key(api_key).build()?)
+                Arc::new(
+                    Anthropic::builder()
+                        .with_http_client(http_client)
+                        .with_api_key(api_key)
+                        .build()?,
+                )
             }
             Provider::Bedrock => {
                 use anthropic_bedrock::AnthropicBedrock;
@@ -56,16 +65,17 @@ impl Cli {
                 use anthropic_vertexai::AnthropicVertexAi;
                 Arc::new(
                     AnthropicVertexAi::builder()
-                        .project(project)
-                        .region(region)
+                        .with_http_client(http_client)
+                        .with_project(project)
+                        .with_region(region)
                         .build()
                         .await?,
                 )
             }
         });
 
-        let server_state =
-            ServerState::new(anthropic, self.auth_token.clone(), self.provider.clone());
+        let server_state = ServerState::new(anthropic, self.provider.clone());
+        let api_token = ApiKey::from(self.api_key.to_owned());
 
         Ok(Router::new()
             .route("/healthz", get(healthz))
@@ -74,8 +84,8 @@ impl Cli {
                 Router::new()
                     .route("/messages", post(messages))
                     .route_layer(middleware::from_fn_with_state(
-                        server_state.clone(),
-                        auth_middleware,
+                        api_token,
+                        axum_auth_api_key::auth_middleware,
                     ))
                     .with_state(server_state),
             )

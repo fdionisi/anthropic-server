@@ -22,14 +22,14 @@ fn get_model(model: &AnthropicModel, provider: &Provider) -> Result<String> {
     Ok(match provider {
         Provider::Anthropic { .. } => model.to_string(),
         Provider::Bedrock { .. } => match model {
-            AnthropicModel::ClaudeThreeDotFiveSonnet => BedrockModel::ClaudeThreeDotFiveSonnet,
+            AnthropicModel::ClaudeThreeDotFiveSonnet => BedrockModel::ClaudeThreeDotFiveSonnetV1,
             AnthropicModel::ClaudeThreeSonnet => BedrockModel::ClaudeThreeSonnet,
             AnthropicModel::ClaudeThreeOpus => BedrockModel::ClaudeThreeOpus,
             AnthropicModel::ClaudeThreeHaiku => BedrockModel::ClaudeThreeHaiku,
         }
         .to_string(),
         Provider::VertexAi { .. } => match model {
-            AnthropicModel::ClaudeThreeDotFiveSonnet => VertexAiModel::ClaudeThreeDotFiveSonnet,
+            AnthropicModel::ClaudeThreeDotFiveSonnet => VertexAiModel::ClaudeThreeDotFiveSonnetV1,
             AnthropicModel::ClaudeThreeSonnet => VertexAiModel::ClaudeThreeSonnet,
             AnthropicModel::ClaudeThreeOpus => VertexAiModel::ClaudeThreeOpus,
             AnthropicModel::ClaudeThreeHaiku => VertexAiModel::ClaudeThreeHaiku,

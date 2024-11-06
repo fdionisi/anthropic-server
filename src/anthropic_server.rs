@@ -2,7 +2,7 @@ mod client;
 pub mod provider;
 mod routes;
 mod server_state;
-mod usage_reporter;
+pub mod usage_reporter;
 
 use std::sync::Arc;
 

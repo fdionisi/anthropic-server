@@ -7,11 +7,11 @@ pub mod usage_reporter;
 use std::sync::Arc;
 
 use axum::{
-    middleware,
+    middleware::{self, Next},
+    response::IntoResponse,
     routing::{get, post},
     Router,
 };
-use axum_auth_api_key::ApiKey;
 use tower_http::trace::TraceLayer;
 
 use crate::{
@@ -22,11 +22,19 @@ use crate::{
     usage_reporter::UsageReporter,
 };
 
+use axum::body::Body;
+use axum::http::Request;
+use axum::http::StatusCode;
+
+pub trait AuthMiddleware: Send + Sync + 'static {
+    fn authenticate(&self, req: &Request<Body>) -> Result<(), (StatusCode, String)>;
+}
+
 pub struct AnthropicServer {
     client: Client,
     provider: Provider,
     usage_reporter: Arc<dyn UsageReporter>,
-    api_key: ApiKey,
+    auth_middleware: Arc<dyn AuthMiddleware>,
 }
 
 impl AnthropicServer {
@@ -37,15 +45,26 @@ impl AnthropicServer {
     pub async fn serve<A: tokio::net::ToSocketAddrs>(self, addr: A) -> anyhow::Result<()> {
         let server_state = ServerState::new(self.client, self.provider, self.usage_reporter);
 
+        let auth_middleware = self.auth_middleware;
+
         let app = Router::new()
             .route("/healthz", get(healthz))
             .nest(
                 "/v1",
                 Router::new()
                     .route("/messages", post(messages))
-                    .route_layer(middleware::from_fn_with_state(
-                        self.api_key,
-                        axum_auth_api_key::auth_middleware,
+                    .route_layer(middleware::from_fn(
+                        move |req: Request<Body>, next: Next| {
+                            let auth_middleware = auth_middleware.clone();
+                            async move {
+                                match auth_middleware.authenticate(&req) {
+                                    Err(err) => return err.into_response(),
+                                    _ => {}
+                                };
+
+                                next.run(req).await
+                            }
+                        },
                     ))
                     .with_state(server_state),
             )
@@ -60,21 +79,18 @@ impl AnthropicServer {
 #[derive(Default)]
 pub struct AnthropicServerBuilder {
     provider: Option<Provider>,
-    api_key: Option<ApiKey>,
+    auth_middleware: Option<Arc<dyn AuthMiddleware>>,
     usage_reporter: Option<Arc<dyn UsageReporter>>,
 }
 
 impl AnthropicServerBuilder {
-    pub fn with_provider(mut self, provider: Provider) -> Self {
-        self.provider = Some(provider);
+    pub fn with_auth_middleware<M: AuthMiddleware + 'static>(mut self, middleware: M) -> Self {
+        self.auth_middleware = Some(Arc::new(middleware));
         self
     }
 
-    pub fn with_api_key<A>(mut self, api_key: A) -> Self
-    where
-        A: Into<ApiKey>,
-    {
-        self.api_key = Some(api_key.into());
+    pub fn with_provider(mut self, provider: Provider) -> Self {
+        self.provider = Some(provider);
         self
     }
 
@@ -87,8 +103,8 @@ impl AnthropicServerBuilder {
         let provider = self
             .provider
             .ok_or_else(|| anyhow::anyhow!("Provider not set"))?;
-        let api_key = self
-            .api_key
+        let auth_middleware = self
+            .auth_middleware
             .ok_or_else(|| anyhow::anyhow!("API key not set"))?;
         let usage_reporter = self
             .usage_reporter
@@ -122,7 +138,7 @@ impl AnthropicServerBuilder {
             client,
             provider,
             usage_reporter,
-            api_key,
+            auth_middleware,
         })
     }
 }

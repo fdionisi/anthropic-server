@@ -1,5 +1,9 @@
-use anthropic_server::{provider::Provider, AnthropicServer};
+use anthropic_server::{provider::Provider, AnthropicServer, AuthMiddleware};
 use anyhow::Result;
+use axum::{
+    body::Body,
+    http::{Request, StatusCode},
+};
 use clap::Parser;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -22,6 +26,35 @@ pub struct Cli {
     provider: Provider,
 }
 
+struct ApiKeyMiddleware {
+    key: String,
+}
+
+impl AuthMiddleware for ApiKeyMiddleware {
+    fn authenticate(&self, req: &Request<Body>) -> Result<(), (StatusCode, String)> {
+        let api_key = req
+            .headers()
+            .get("x-api-key")
+            .ok_or((
+                StatusCode::UNAUTHORIZED,
+                "Missing x-api-key header".to_string(),
+            ))?
+            .to_str()
+            .map_err(|_| {
+                (
+                    StatusCode::UNAUTHORIZED,
+                    "Invalid x-api-key header".to_string(),
+                )
+            })?;
+
+        if api_key == self.key {
+            Ok(())
+        } else {
+            Err((StatusCode::UNAUTHORIZED, "Invalid API key".to_string()))
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     tracing_subscriber::registry()
@@ -37,7 +70,7 @@ async fn main() -> Result<()> {
 
     AnthropicServer::builder()
         .with_provider(cli.provider)
-        .with_api_key(cli.api_key)
+        .with_auth_middleware(ApiKeyMiddleware { key: cli.api_key })
         .build()
         .await?
         .serve((cli.host, cli.port))

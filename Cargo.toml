@@ -3,6 +3,9 @@ name = "anthropic-server"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+path = "src/anthropic_server.rs"
+
 [dependencies]
 anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "0d0e48dc6c1cd42d4d4d4d35d9a040f793424564" }
 anthropic_bedrock = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "0d0e48dc6c1cd42d4d4d4d35d9a040f793424564" }

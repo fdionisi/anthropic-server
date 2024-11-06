@@ -15,6 +15,7 @@ use crate::{
     provider::Provider,
     routes::{healthz, messages},
     server_state::ServerState,
+    usage_reporter::PostgresUsageReporter,
 };
 
 /// Anthropic proxy server.
@@ -34,6 +35,9 @@ pub struct Cli {
     /// The provider to use for the model
     #[command(subcommand)]
     provider: Provider,
+    /// Usage reporter postgres connection string
+    #[clap(long, env = "USAGE_REPORTER_URL")]
+    usage_reporter_url: String,
 }
 
 impl Cli {
@@ -74,7 +78,17 @@ impl Cli {
             }
         });
 
-        let server_state = ServerState::new(anthropic, self.provider.clone());
+        let server_state = ServerState::new(
+            anthropic,
+            self.provider.clone(),
+            Arc::new(
+                PostgresUsageReporter::builder()
+                    .with_address(&self.usage_reporter_url)
+                    .build()
+                    .await?,
+            ),
+        );
+
         let api_token = ApiKey::from(self.api_key.to_owned());
 
         Ok(Router::new()

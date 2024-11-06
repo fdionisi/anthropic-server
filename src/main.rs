@@ -3,6 +3,7 @@ mod client;
 mod provider;
 mod routes;
 mod server_state;
+mod usage_reporter;
 
 use anyhow::Result;
 use clap::Parser;

@@ -1,4 +1,4 @@
-use std::{convert::Infallible, str::FromStr};
+use std::{convert::Infallible, str::FromStr, sync::Arc};
 
 use anthropic::{
     messages::{CreateMessageResponse, IncomingCreateMessageRequest},
@@ -16,7 +16,7 @@ use axum::{
 use futures::StreamExt;
 use serde_json::json;
 
-use crate::{client::Client, provider::Provider};
+use crate::{client::Client, provider::Provider, usage_reporter::UsageReporter};
 
 fn get_model(model: &AnthropicModel, provider: &Provider) -> Result<String> {
     Ok(match provider {
@@ -60,6 +60,7 @@ pub async fn healthz() -> Response {
 pub async fn messages(
     State(client): State<Client>,
     State(provider): State<Provider>,
+    State(usage_reporter): State<Arc<dyn UsageReporter>>,
     Json(request): Json<IncomingCreateMessageRequest>,
 ) -> Response {
     let IncomingCreateMessageRequest {
@@ -100,8 +101,19 @@ pub async fn messages(
             .await
             .unwrap();
 
-        let stream = stream.map(|item| {
+        let stream = stream.map(move |item| {
             let item = item.unwrap();
+
+            match item {
+                anthropic::messages::Event::MessageDelta { ref usage, .. } => {
+                    match usage_reporter.report(&usage) {
+                        Err(err) => tracing::warn!(err = err.to_string(), "usage reporting failed"),
+                        _ => {}
+                    };
+                }
+                _ => {}
+            }
+
             let item = serde_json::to_value(&item).unwrap();
             Ok::<Event, Infallible>(
                 Event::default()
@@ -116,7 +128,12 @@ pub async fn messages(
     } else {
         match client.messages(create_message_request).await {
             Ok(message_respose) => match message_respose {
-                CreateMessageResponse::Message(_) => {
+                CreateMessageResponse::Message(ref message) => {
+                    match usage_reporter.report(&message.usage) {
+                        Err(err) => tracing::warn!(err = err.to_string(), "usage reporting failed"),
+                        _ => {}
+                    };
+
                     (StatusCode::OK, Json(message_respose)).into_response()
                 }
                 CreateMessageResponse::Error { .. } => {

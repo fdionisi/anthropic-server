@@ -16,7 +16,11 @@ use axum::{
 use futures::StreamExt;
 use serde_json::json;
 
-use crate::{client::Client, provider::Provider, usage_reporter::UsageReporter};
+use crate::{
+    client::Client,
+    provider::Provider,
+    usage_reporter::{UsageReport, UsageReporter},
+};
 
 fn get_model(model: &AnthropicModel, provider: &Provider) -> Result<String> {
     Ok(match provider {
@@ -106,7 +110,10 @@ pub async fn messages(
 
             match item {
                 anthropic::messages::Event::MessageDelta { ref usage, .. } => {
-                    match usage_reporter.report(&usage) {
+                    match usage_reporter.report(UsageReport {
+                        model: model.to_string(),
+                        usage: usage.clone(),
+                    }) {
                         Err(err) => tracing::warn!(err = err.to_string(), "usage reporting failed"),
                         _ => {}
                     };
@@ -129,7 +136,10 @@ pub async fn messages(
         match client.messages(create_message_request).await {
             Ok(message_respose) => match message_respose {
                 CreateMessageResponse::Message(ref message) => {
-                    match usage_reporter.report(&message.usage) {
+                    match usage_reporter.report(UsageReport {
+                        model: model.to_string(),
+                        usage: message.usage.clone(),
+                    }) {
                         Err(err) => tracing::warn!(err = err.to_string(), "usage reporting failed"),
                         _ => {}
                     };

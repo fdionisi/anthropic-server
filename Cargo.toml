@@ -15,6 +15,7 @@ anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = 
 # anthropic_vertexai = { path = "../anthropic/crates/vertexai" }
 
 anyhow = "1"
+async-stream = "0.3.6"
 aws-config = "1.5.5"
 axum = "0.7"
 axum-auth-api-key = { git = "https://github.com/fdionisi/axum-auth-api-key", rev = "c4efd735de3fe9badd03fb21ca038d2a52121b8b" }

@@ -100,34 +100,53 @@ pub async fn messages(
     };
 
     if stream.is_some_and(|f| f) {
-        let stream = client
-            .messages_stream(create_message_request)
-            .await
-            .unwrap();
-
-        let stream = stream.map(move |item| {
-            let item = item.unwrap();
-
-            match item {
-                anthropic::messages::Event::MessageDelta { ref usage, .. } => {
-                    match usage_reporter.report(UsageReport {
-                        model: model.to_string(),
-                        usage: usage.clone(),
-                    }) {
-                        Err(err) => tracing::warn!(err = err.to_string(), "usage reporting failed"),
-                        _ => {}
-                    };
-                }
-                _ => {}
+        let mut messages_stream = match client.messages_stream(create_message_request).await {
+            Ok(stream) => stream,
+            Err(err) => {
+                tracing::error!("Failed to create message stream: {}", err);
+                return (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    Json(json!({ "error": "Internal server error" })),
+                )
+                    .into_response();
             }
+        };
 
-            let item = serde_json::to_value(&item).unwrap();
-            Ok::<Event, Infallible>(
-                Event::default()
-                    .event(item["type"].as_str().unwrap())
-                    .data(&serde_json::to_string(&item).unwrap()),
-            )
-        });
+        let stream = async_stream::stream! {
+            let mut actual_model = None;
+
+            while let Some(item) = messages_stream.next().await {
+                let item = item.unwrap();
+                match item {
+                    anthropic::messages::Event::MessageStart { ref message } => {
+                        actual_model.replace(message.message_response.model.clone());
+                    }
+                    anthropic::messages::Event::MessageDelta { ref usage, .. } => {
+                        if let Some(actual_model) = actual_model.to_owned() {
+                            match usage_reporter.report(UsageReport {
+                                model: actual_model,
+                                usage: usage.clone(),
+                            }) {
+                                Err(err) => {
+                                    tracing::warn!(err = err.to_string(), "usage reporting failed")
+                                }
+                                _ => {}
+                            };
+                        } else {
+                            tracing::warn!("actual model not found");
+                        }
+                    }
+                    _ => {}
+                }
+
+                let item = serde_json::to_value(&item).unwrap();
+                yield Ok::<Event, Infallible>(
+                    Event::default()
+                        .event(item["type"].as_str().unwrap())
+                        .data(&serde_json::to_string(&item).unwrap()),
+                )
+            }
+        };
 
         Sse::new(stream)
             .keep_alive(axum::response::sse::KeepAlive::new())

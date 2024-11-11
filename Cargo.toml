@@ -7,21 +7,18 @@ edition = "2021"
 path = "src/anthropic_server.rs"
 
 [dependencies]
-anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "0d0e48dc6c1cd42d4d4d4d35d9a040f793424564" }
-anthropic_bedrock = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "0d0e48dc6c1cd42d4d4d4d35d9a040f793424564" }
-anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "0d0e48dc6c1cd42d4d4d4d35d9a040f793424564" }
-# anthropic = { path = "../anthropic/crates/anthropic" }
-# anthropic_bedrock = { path = "../anthropic/crates/bedrock" }
-# anthropic_vertexai = { path = "../anthropic/crates/vertexai" }
+anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "687ae1e8695db948b623423538e68be3dea05c0b" }
+anthropic_bedrock = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "687ae1e8695db948b623423538e68be3dea05c0b" }
+anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "687ae1e8695db948b623423538e68be3dea05c0b" }
 
 anyhow = "1"
-async-stream = "0.3.6"
-aws-config = "1.5.5"
+async-stream = "0.3"
+aws-config = "1.5"
 axum = "0.7"
 axum-auth-api-key = { git = "https://github.com/fdionisi/axum-auth-api-key", rev = "c4efd735de3fe9badd03fb21ca038d2a52121b8b" }
 clap = { version = "4.5.15", features = ["derive", "env"] }
 futures = "0.3"
-http-client-reqwest = { git = "https://github.com/fdionisi/http-client", rev = "033ac96ab12ac3d13b78f9725b237380917c7094" }
+http-client-reqwest = { git = "https://github.com/fdionisi/http-client", rev = "c4a778815ecb94411f7db6385052655b181a9676" }
 serde_json = "1"
 tokio = { version = "1.0", features = ["full"] }
 tower-http = { version = "0.5.0", features = ["fs", "trace", "cors"] }

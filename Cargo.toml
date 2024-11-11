@@ -7,9 +7,12 @@ edition = "2021"
 path = "src/anthropic_server.rs"
 
 [dependencies]
-anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "687ae1e8695db948b623423538e68be3dea05c0b" }
-anthropic_bedrock = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "687ae1e8695db948b623423538e68be3dea05c0b" }
-anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "687ae1e8695db948b623423538e68be3dea05c0b" }
+anthropic = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "3dfcc4070416d512342667c8f43c68a8325f7770" }
+anthropic_bedrock = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "3dfcc4070416d512342667c8f43c68a8325f7770" }
+anthropic_vertexai = { git = "https://github.com/fdionisi/anthropic-sdk", rev = "3dfcc4070416d512342667c8f43c68a8325f7770" }
+# anthropic = { path = "../anthropic/crates/anthropic" }
+# anthropic_bedrock = { path = "../anthropic/crates/bedrock" }
+# anthropic_vertexai = { path = "../anthropic/crates/vertexai" }
 
 anyhow = "1"
 async-stream = "0.3"

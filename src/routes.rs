@@ -156,7 +156,7 @@ pub async fn messages(
             Ok(message_respose) => match message_respose {
                 CreateMessageResponse::Message(ref message) => {
                     match usage_reporter.report(UsageReport {
-                        model: model.to_string(),
+                        model: message.model.to_string(),
                         usage: message.usage.clone(),
                     }) {
                         Err(err) => tracing::warn!(err = err.to_string(), "usage reporting failed"),
